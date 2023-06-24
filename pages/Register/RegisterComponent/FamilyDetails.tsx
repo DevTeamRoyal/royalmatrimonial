@@ -43,7 +43,8 @@ interface Data {
 }
 const FamilyDetails: React.FC<ProfileDetailsProps> = ({
   nextPage,
-  profileComplete, DisabledHeadingMessage
+  profileComplete,
+  DisabledHeadingMessage,
 }) => {
   const dispatch = useDispatch();
   const stepFourDefaultValues = useSelector(selectStep4Success);
@@ -92,7 +93,7 @@ const FamilyDetails: React.FC<ProfileDetailsProps> = ({
     val: "",
   });
   const [selectedNativeCountry, setSelectedNativeCountry] = useState<number>(
-    jsonData?.family_native_country || 100
+    jsonData?.family_native_country || 101
   );
   const [selectedNativeState, setSelectedNativeState] = useState<number>(
     jsonData?.family_native_state || -1
@@ -125,7 +126,7 @@ const FamilyDetails: React.FC<ProfileDetailsProps> = ({
       livingWithParents: String(jsonData?.living_with_parents),
     },
     onSubmit: async (values: IRegisterStep4) => {
-      setloadingSpiner(true)
+      setloadingSpiner(true);
       let response;
       if (isReduxEmpty) {
         response = await axios.post(
@@ -155,28 +156,8 @@ const FamilyDetails: React.FC<ProfileDetailsProps> = ({
   });
 
   useEffect(() => {
-    setSelectedNativeCountry(
-      jsonData?.family_native_country != undefined
-        ? jsonData?.family_native_country
-        : 0
-    );
-    setSelectedNativeState(
-      jsonData?.family_native_state != undefined
-        ? jsonData?.family_native_state
-        : -1
-    );
-    setSelectedNativeCity(
-      jsonData?.family_native_city != undefined
-        ? jsonData?.family_native_city
-        : -1
-    );
     setGothraVal(jsonData?.Gothra != undefined ? jsonData?.Gothra : "");
-  }, [
-    jsonData?.family_native_country,
-    jsonData?.family_native_state,
-    jsonData?.family_native_city,
-    jsonData?.Gothra,
-  ]);
+  }, [jsonData?.Gothra]);
 
   useEffect(() => {
     formik.values.mothersProfession = selectedMothersOccupation.id;
@@ -192,15 +173,24 @@ const FamilyDetails: React.FC<ProfileDetailsProps> = ({
     formik.values.livingWithParents = String(selectedLivingWithParents.id);
     formik.values.gothra = gothraVal;
 
-
-    if (selectedMothersOccupation.id !== "undefined" && selectedFathersOccupation.id !== "undefined" && selectedSister.id !== "undefined"
-      && selectedBrother.id !== "undefined" && selectedFamilyStatus.id !== "undefined" && selectedFamilyIncome.id !== "undefined" &&
-      selectedFamilyType.id !== "undefined" && selectedNativeCountry >= 0 && selectedNativeState >= 0 && selectedNativeCity >= 0 && selectedLivingWithParents.id !== "undefined" && formik.values.gothra) {
-      setNextDisable(false)
+    if (
+      selectedMothersOccupation.id !== "undefined" &&
+      selectedFathersOccupation.id !== "undefined" &&
+      selectedSister.id !== "undefined" &&
+      selectedBrother.id !== "undefined" &&
+      selectedFamilyStatus.id !== "undefined" &&
+      selectedFamilyIncome.id !== "undefined" &&
+      selectedFamilyType.id !== "undefined" &&
+      selectedNativeCountry >= 0 &&
+      selectedNativeState >= 0 &&
+      selectedNativeCity >= 0 &&
+      selectedLivingWithParents.id !== "undefined" &&
+      formik.values.gothra
+    ) {
+      setNextDisable(false);
     } else {
-      setNextDisable(true)
+      setNextDisable(true);
     }
-
   }, [
     formik.values,
     jsonData,
@@ -229,8 +219,8 @@ const FamilyDetails: React.FC<ProfileDetailsProps> = ({
   };
 
   function handleSkip() {
-    setSkiploadingSpiner(true)
-    router.push("/DesiredProfile")
+    setSkiploadingSpiner(true);
+    router.push("/DesiredProfile");
   }
   return (
     <div className={classes.profile_Container}>
@@ -239,7 +229,11 @@ const FamilyDetails: React.FC<ProfileDetailsProps> = ({
           <Loader />
         ) : (
           <Row className="justify-content-center">
-            <Button variant="link" className={`${classes.Form_btn} ${classes.Skip_Btn} mt-2 mb-4 align-self-md-end`} onClick={handleSkip} >
+            <Button
+              variant="link"
+              className={`${classes.Form_btn} ${classes.Skip_Btn} mt-2 mb-4 align-self-md-end`}
+              onClick={handleSkip}
+            >
               {skiploadingSpiner && (
                 <Spinner
                   className={classes.loginSpiner}

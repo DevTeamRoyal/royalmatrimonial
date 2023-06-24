@@ -147,7 +147,7 @@ const DesiredProfilePage: React.FC = () => {
   const [selectedSwitches, setSelectedSwitches] = useState<string[]>(
     jsonData?.mandatory_fields || []
   );
-
+    
   const [successMessage, setSuccessMessage] = useState<boolean>(false);
   const savePartnerPref = async (event: any) => {
     event.preventDefault();
@@ -218,7 +218,7 @@ const DesiredProfilePage: React.FC = () => {
     setHiv({ id: jsonData?.HIV === 1 ? "Yes" : "No", val: "" });
     setSelectedSwitches(jsonData?.mandatory_fields || []);
   }, [jsonData, jsonData?.HIV, jsonData?.mandatory_fields]);
-
+  console.log(city);
   return (
     <React.Fragment>
       <Container fluid className={classes.background_header}>
