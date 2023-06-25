@@ -118,6 +118,10 @@ const CareerDetails: React.FC<ProfileDetailsProps> = ({
     validationSchema: Yup.object({
       college: Yup.string()
         .min(3, "Must be 3 characters or more")
+        .matches(
+          /^[0-9A-Za-z,\s]+$/,
+          "Only alphabets, numbers, spaces, commas are allowed"
+        )
         .required("Required"),
     }),
     onSubmit: async (values) => {
@@ -190,6 +194,9 @@ const CareerDetails: React.FC<ProfileDetailsProps> = ({
     ) {
       setNextDisable(false);
     }
+    else {
+      setNextDisable(true)
+    }
   }, [
     annualIncome.id,
     education.id,
@@ -201,6 +208,14 @@ const CareerDetails: React.FC<ProfileDetailsProps> = ({
     selectedState,
     settleAboard.id,
   ]);
+
+
+  //disable if collage input show error 
+  useEffect(() => {
+    if (formik.errors.college) {
+      setNextDisable(true);
+    }
+  }, [formik.errors])
 
   const getSelectedCountry = (id: number) => {
     setSelectedCountry(id);
@@ -216,8 +231,9 @@ const CareerDetails: React.FC<ProfileDetailsProps> = ({
     if (jsonData && jsonData.College) {
       formik.values.college = jsonData.College;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jsonData, jsonData?.College]);
+
 
   return (
     <div className={classes.profile_Container}>
@@ -294,7 +310,7 @@ const CareerDetails: React.FC<ProfileDetailsProps> = ({
                     setErrorState={setResidentialStatusTouched}
                   />
                   {residentialStatusTouched &&
-                  residentialStatus.id == "null" ? (
+                    residentialStatus.id == "null" ? (
                     <div>
                       <span className={classes.errorMessage}>
                         Please select value from dropdown

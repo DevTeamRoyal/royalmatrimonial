@@ -41,8 +41,7 @@ const CitySingle: React.FC<CitySingle> = ({
   );
 
   const cityOfState: ICity[] = City.getCitiesOfState(countryCode, stateCode);
-  const allCitiesOfCountry: ICity[] =
-    City.getCitiesOfCountry(countryCode) || [];
+  const allCitiesOfCountry: ICity[] =City.getCitiesOfCountry(countryCode) || [];
 
   const defaultCity = useCallback(() => {
     if(defaultValueCity){

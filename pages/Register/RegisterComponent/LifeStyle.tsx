@@ -146,6 +146,10 @@ const LifeStyle: React.FC<ProfileDetailsProps> = ({
     validationSchema: Yup.object({
       religiousBelief: Yup.string()
         .min(3, "Must be 3 characters or more")
+        .matches(
+          /^[0-9A-Za-z,\s.]+$/,
+          "Only alphabets, numbers, spaces, commas are allowed"
+        )
         .required("Required"),
     }),
     onSubmit: async (values) => {
@@ -239,6 +243,17 @@ const LifeStyle: React.FC<ProfileDetailsProps> = ({
     cartype,
     housetype,
   ]);
+
+
+  
+  //disable if religiousBelief input show error 
+  useEffect(() => {
+    if (formik.errors.religiousBelief) {
+      setNextDisable(true);
+    }
+  }, [formik.errors])
+
+
 
   function handleSkip() {
     setSkiploadingSpiner(true);
