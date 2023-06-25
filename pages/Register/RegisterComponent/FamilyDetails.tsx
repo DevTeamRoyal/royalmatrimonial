@@ -31,6 +31,8 @@ import CitySingle from "../../../components/InputField/CountryStateSingle/CitySi
 import StateSingle from "../../../components/InputField/CountryStateSingle/StateSingle";
 import Loader from "../../../components/Loader/Loader";
 import router from "next/router";
+import * as Yup from "yup";
+
 
 interface ProfileDetailsProps {
   nextPage: (a: number) => void;
@@ -101,6 +103,14 @@ const FamilyDetails: React.FC<ProfileDetailsProps> = ({
   const [selectedNativeCity, setSelectedNativeCity] = useState<number>(
     jsonData?.family_native_city || -1
   );
+
+  useEffect(() => {
+    setSelectedNativeCity(jsonData?.family_native_city != undefined ? jsonData?.family_native_city : selectedNativeCity);
+    setSelectedNativeState(jsonData?.family_native_state != undefined ? jsonData?.family_native_state : selectedNativeState);
+    setSelectedNativeCountry(jsonData?.family_native_country != undefined ? jsonData?.family_native_country : selectedNativeCountry);
+  }, [jsonData?.family_native_country, jsonData?.family_native_state, jsonData?.family_native_city])
+
+
   const [selectedLivingWithParents, setSelectedLivingWithParents] =
     useState<Data>({ id: String(jsonData?.living_with_parents), val: "" });
 
@@ -125,6 +135,13 @@ const FamilyDetails: React.FC<ProfileDetailsProps> = ({
       familyNativeCity: jsonData?.family_native_city,
       livingWithParents: String(jsonData?.living_with_parents),
     },
+    validationSchema: Yup.object({
+      gothra: Yup.string()
+        .matches(
+          /^[0-9A-Za-z,\s.]+$/,
+          "Only alphabets, numbers, spaces, commas are allowed"
+        )
+    }),
     onSubmit: async (values: IRegisterStep4) => {
       setloadingSpiner(true);
       let response;
@@ -171,7 +188,7 @@ const FamilyDetails: React.FC<ProfileDetailsProps> = ({
     formik.values.familyNativeState = selectedNativeState;
     formik.values.familyNativeCity = selectedNativeCity;
     formik.values.livingWithParents = String(selectedLivingWithParents.id);
-    formik.values.gothra = gothraVal;
+    // formik.values.gothra = gothraVal;
 
     if (
       selectedMothersOccupation.id !== "undefined" &&
@@ -184,8 +201,8 @@ const FamilyDetails: React.FC<ProfileDetailsProps> = ({
       selectedNativeCountry >= 0 &&
       selectedNativeState >= 0 &&
       selectedNativeCity >= 0 &&
-      selectedLivingWithParents.id !== "undefined" &&
-      formik.values.gothra
+      selectedLivingWithParents.id !== "undefined"
+      // formik.values.gothra
     ) {
       setNextDisable(false);
     } else {
@@ -207,6 +224,15 @@ const FamilyDetails: React.FC<ProfileDetailsProps> = ({
     selectedSister.id,
     gothraVal,
   ]);
+
+
+  //disable if gothra input show error 
+  useEffect(() => {
+    if (formik.errors.gothra) {
+      setNextDisable(true);
+    }
+  }, [formik.errors])
+
 
   const getSelectedCountry = (id: number) => {
     setSelectedNativeCountry(id);
@@ -275,15 +301,28 @@ const FamilyDetails: React.FC<ProfileDetailsProps> = ({
                     nameid="brother"
                     defaultValue={String(jsonData?.Brother)}
                   />
-                  <div className={classes.singleBox}>
-                    <Form.Label>Gothra</Form.Label>
-                    <Form.Control
-                      name="gothra"
-                      placeholder="About Gothra"
-                      onBlur={formik.handleBlur}
-                      onChange={(e) => setGothraVal(e.target.value)}
-                      defaultValue={jsonData?.Gothra && jsonData.Gothra}
-                    />
+                  <div>
+                    <div className={classes.singleBox}>
+                      <Form.Label>Gothra</Form.Label>
+                      <Form.Control
+                        name="gothra"
+                        placeholder="About Gothra"
+                        onBlur={formik.handleBlur}
+                        // onChange={(e) => setGothraVal(e.target.value)}
+                        onChange={formik.handleChange}
+                        defaultValue={jsonData?.Gothra && jsonData.Gothra}
+                      />
+                    </div>
+                    {formik.touched.gothra &&
+                      formik.errors.gothra ? (
+                      <div>
+                        <span className={classes.errorMessage}>
+                          {formik.errors.gothra}
+                        </span>
+                      </div>
+                    ) : (
+                      ""
+                    )}
                   </div>
                   <DropdownGridSingleSelect
                     selectedDataFn={setSelectedFamilyStatus}
