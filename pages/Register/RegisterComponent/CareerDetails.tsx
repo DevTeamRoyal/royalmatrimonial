@@ -58,7 +58,7 @@ const CareerDetails: React.FC<ProfileDetailsProps> = ({
   }, [dispatch, isReduxEmpty, userId]);
 
   const [selectedCountry, setSelectedCountry] = useState<number>(
-    jsonData?.country || 100
+    jsonData?.country || 101
   );
   const [selectedState, setSelectedState] = useState<number>(
     jsonData?.state || -1
