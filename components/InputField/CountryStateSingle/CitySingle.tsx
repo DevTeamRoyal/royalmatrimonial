@@ -6,7 +6,7 @@ import {
   IState,
   State,
 } from "country-state-city";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import classes from "./CountryStateCityMultiple.module.scss";
 
 interface CitySingle {
@@ -44,8 +44,12 @@ const CitySingle: React.FC<CitySingle> = ({
   const allCitiesOfCountry: ICity[] =
     City.getCitiesOfCountry(countryCode) || [];
 
-  const defaultCity = defaultValueCity && cityOfState[defaultValueCity]?.name;
-  const cityIndex = cityOfState.findIndex((obj) => obj.name === defaultCity);
+  const defaultCity = useCallback(() => {
+    if(defaultValueCity){
+      return cityOfState[defaultValueCity]?.name;
+    }
+  }, [defaultValueCity]);
+  const cityIndex = cityOfState.findIndex((obj) => obj.name === defaultCity());
 
   useEffect(() => {
     if (defaultValueState != undefined) {
@@ -162,20 +166,20 @@ const CitySingle: React.FC<CitySingle> = ({
     };
   }, [elementRef, activeList]);
 
-  const [hasMounted, setHasMounted] = useState<boolean>(false);
+  // const [hasMounted, setHasMounted] = useState<boolean>(false);
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (hasMounted) {
-        setSelectedData("Select City");
-      } else {
-        setHasMounted(true);
-      }
-    }, 500);
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [stateCode, countryCode]);
+  // useEffect(() => {
+  //   const timeout = setTimeout(() => {
+  //     if (hasMounted) {
+  //       setSelectedData("Select City");
+  //     } else {
+  //       setHasMounted(true);
+  //     }
+  //   }, 500);
+  //   return () => {
+  //     clearTimeout(timeout);
+  //   };
+  // }, [stateCode, countryCode]);
 
   return (
     <>
