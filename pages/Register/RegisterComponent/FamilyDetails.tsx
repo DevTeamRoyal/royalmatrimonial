@@ -93,7 +93,7 @@ const FamilyDetails: React.FC<ProfileDetailsProps> = ({
     val: "",
   });
   const [selectedNativeCountry, setSelectedNativeCountry] = useState<number>(
-    jsonData?.family_native_country || 100
+    jsonData?.family_native_country || 101
   );
   const [selectedNativeState, setSelectedNativeState] = useState<number>(
     jsonData?.family_native_state || -1
@@ -156,28 +156,8 @@ const FamilyDetails: React.FC<ProfileDetailsProps> = ({
   });
 
   useEffect(() => {
-    setSelectedNativeCountry(
-      jsonData?.family_native_country != undefined
-        ? jsonData?.family_native_country
-        : 0
-    );
-    setSelectedNativeState(
-      jsonData?.family_native_state != undefined
-        ? jsonData?.family_native_state
-        : -1
-    );
-    setSelectedNativeCity(
-      jsonData?.family_native_city != undefined
-        ? jsonData?.family_native_city
-        : -1
-    );
     setGothraVal(jsonData?.Gothra != undefined ? jsonData?.Gothra : "");
-  }, [
-    jsonData?.family_native_country,
-    jsonData?.family_native_state,
-    jsonData?.family_native_city,
-    jsonData?.Gothra,
-  ]);
+  }, [jsonData?.Gothra]);
 
   useEffect(() => {
     formik.values.mothersProfession = selectedMothersOccupation.id;

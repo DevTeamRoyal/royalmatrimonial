@@ -24,23 +24,28 @@ const CitySingle: React.FC<CitySingle> = ({
   setSelectedCity,
   defaultValueState,
   defaultValueCity,
-  setErrorState
+  setErrorState,
 }) => {
   const countries: ICountry[] = Country.getAllCountries();
   const [countryCode, setCountryCode] = useState<string>(
     defaultValueCountry != (undefined && null)
-      ? countries[defaultValueCountry].isoCode
+      ? countries[defaultValueCountry - 1].isoCode
       : "IN"
   );
 
   const stateOfCountry: IState[] = State.getStatesOfCountry(countryCode);
   const [stateCode, setStateCode] = useState<string>(
     defaultValueState != (undefined && null)
-      ? stateOfCountry[defaultValueState]?.isoCode
+      ? stateOfCountry[defaultValueState - 1]?.isoCode
       : "AS"
   );
 
   const cityOfState: ICity[] = City.getCitiesOfState(countryCode, stateCode);
+  const allCitiesOfCountry: ICity[] =
+    City.getCitiesOfCountry(countryCode) || [];
+
+  const defaultCity = defaultValueCity && cityOfState[defaultValueCity]?.name;
+  const cityIndex = cityOfState.findIndex((obj) => obj.name === defaultCity);
 
   useEffect(() => {
     if (defaultValueState != undefined) {
@@ -57,9 +62,8 @@ const CitySingle: React.FC<CitySingle> = ({
   const [activeList, setActiveList] = useState<boolean>(false);
   const [searchInput, setSearchInput] = useState("");
   const [selectedData, setSelectedData] = useState(
-    (defaultValueCity != (undefined && null) &&
-      cityOfState[defaultValueCity]?.name) ||
-    "Select City"
+    (defaultValueCity != (undefined && null) && cityOfState[cityIndex]?.name) ||
+      "Select City"
   );
   const [searchHostedArray, UpdatesearchHostedArray] =
     useState<ICity[]>(cityOfState);
@@ -72,6 +76,16 @@ const CitySingle: React.FC<CitySingle> = ({
     UpdatesearchHostedArray(searchHostedArrays);
   };
 
+  // console.log(defaultValueCity && defaultValueCity - 1, "city index");
+  // console.log(
+  //   defaultValueCountry && countries[defaultValueCountry - 1],
+  //   "country"
+  // );
+  // console.log(
+  //   defaultValueState && stateOfCountry[defaultValueState - 1],
+  //   "state"
+  // );
+  // console.log(defaultValueCity && cityOfState[defaultValueCity - 1], "city");
   // useEffect(() => {
   //   setSelectedData(
   //     (defaultValueCity != (undefined && null) &&
@@ -85,16 +99,16 @@ const CitySingle: React.FC<CitySingle> = ({
   useEffect(() => {
     defaultValueCountry !== undefined &&
       countries[defaultValueCountry] !== undefined &&
-      setCountryCode(countries[defaultValueCountry].isoCode);
+      setCountryCode(countries[defaultValueCountry - 1].isoCode);
     defaultValueState != undefined &&
       stateOfCountry[defaultValueState] !== undefined &&
       defaultValueState >= 0 &&
-      setStateCode(stateOfCountry[defaultValueState].isoCode);
+      setStateCode(stateOfCountry[defaultValueState - 1].isoCode);
     UpdatesearchHostedArray(cityOfState);
     defaultValueCity != undefined &&
       defaultValueCity >= 0 &&
-      cityOfState[defaultValueCity] !== undefined &&
-      setSelectedData(cityOfState[defaultValueCity]?.name);
+      allCitiesOfCountry[defaultValueCity] !== undefined &&
+      setSelectedData(allCitiesOfCountry[defaultValueCity - 1]?.name);
   }, [
     countryCode,
     stateCode,
@@ -105,7 +119,9 @@ const CitySingle: React.FC<CitySingle> = ({
 
   const getClickedData = (item: ICity) => {
     setSelectedData(item.name);
-    const getIndex = cityOfState.findIndex((obj) => obj.name === item.name);
+    const getIndex =
+      allCitiesOfCountry.findIndex((obj) => obj.name === item.name) + 1;
+    // console.log(getIndex, "new city index");
     setSelectedCity(getIndex);
     setSearchInput("");
     activeList && setErrorState !== undefined && setErrorState(true);
@@ -114,17 +130,18 @@ const CitySingle: React.FC<CitySingle> = ({
       setActiveList(false);
     }, 100);
   };
-
   // To Find the country Which is get defaultValueState
   useEffect(() => {
     if (defaultValueCountry != undefined) {
       setCountryCode(
-        countries[defaultValueCountry && defaultValueCountry].isoCode
+        countries[defaultValueCountry && defaultValueCountry - 1].isoCode
       );
     }
     if (defaultValueState != undefined) {
       setStateCode(
-        defaultValueState ? stateOfCountry[defaultValueState]?.isoCode : "AS"
+        defaultValueState
+          ? stateOfCountry[defaultValueState - 1]?.isoCode
+          : "AS"
       );
       // setSelecedData("Select City");
     }
@@ -177,8 +194,9 @@ const CitySingle: React.FC<CitySingle> = ({
             )}
           </ul>
           <div
-            className={`${activeList ? classes.active : ""} ${classes.inputBoxVal
-              }`}
+            className={`${activeList ? classes.active : ""} ${
+              classes.inputBoxVal
+            }`}
             ref={elementRef}
           >
             <ul>
