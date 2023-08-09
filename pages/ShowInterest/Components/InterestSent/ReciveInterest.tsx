@@ -29,7 +29,7 @@ const ReciveInterest: React.FC<ShowInterestProps> = ({ key, data, userId, handle
     useEffect(() => {
         const cancleData = data && data?.filter((user) => {
             if (user?.status === 'S'
-                && user?.usercard?.interest?.Send === null)
+                && user?.usercard?.interest?.Receive === 'S' && user.usercard.interest.Send != 'D' && user.usercard.interest.Send != 'A')
                 return user
         })
         setReciveInterestUser(cancleData);
@@ -49,7 +49,7 @@ const ReciveInterest: React.FC<ShowInterestProps> = ({ key, data, userId, handle
                         {reciveInterestUser && reciveInterestUser.map((user) => {
                             if (user.usercard) {
                                 return (
-                                    <ProfileCard userData={user?.usercard} userID={userId || 0} key={user?.userid + user?.usercard?.user_RM_ID} SendInterestUser={sendInterest} BlockedUser={BlockedUser} setBlock={handleBlockedUser} setSendInterest={setSendInterest} updateBlockListedUser={updateShortListedUser} />
+                                    <InterestRecivedCard userData={user?.usercard} userID={userId || 0} key={user.userid + user?.usercard?.user_RM_ID} BlockedUser={BlockedUser} handleUpdateds={handleUpdateds} setBlock={handleBlockedUser} setSendInterest={setSendInterest} updateBlockListedUser={updateBlockListedUser} />
                                 )
                             }
                         })}

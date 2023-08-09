@@ -15,7 +15,7 @@ import { matchMakingSuccess } from '../../ducks/matchMaking/actions';
 import { City, Country, ICity, ICountry, IState, State } from 'country-state-city';
 import { ICardResponse } from '../../types/cardResponse/cardResponse';
 import ConfirMationsPopup from '../ConfirmationsPopup';
-import { TbRefreshDot } from 'react-icons/tb';
+import { searchByDataSuccess } from '../../ducks/searchByData/actions';
 
 interface MyComponentProps {
     userData: ICardResponse;
@@ -25,12 +25,10 @@ interface MyComponentProps {
     BlockedUser: number[];
     setSendInterest: (val: number[]) => void;
     setBlock?: (val: number) => void;
-    updateShortListedUser?: (id: number, val?: any) => void;
-    updateBlockListedUser?: (val: any, id: number) => void;
     handleUpdateds?: (val: number) => void;
 }
 
-const ProfileCard: FC<MyComponentProps> = ({ userData, userID, key, SendInterestUser, BlockedUser, setBlock, setSendInterest, updateBlockListedUser, updateShortListedUser, handleUpdateds }) => {
+const SearchProfileCard: FC<MyComponentProps> = ({ userData, userID, key, SendInterestUser, BlockedUser, setBlock, setSendInterest, handleUpdateds }) => {
     const router = useRouter()
     const dispatch = useDispatch();
     const { useSendInterestMutation, SendInterestQuery } = useSendInterest();
@@ -39,9 +37,7 @@ const ProfileCard: FC<MyComponentProps> = ({ userData, userID, key, SendInterest
     const [shortlistUser, setShortlistedUser] = useState(userData?.shortlist === 1 ? true : false);
     const [interestPopup, setInterestPopup] = useState<boolean>(false);
     const [blockPopup, setBlockPopup] = useState<boolean>(false);
-    const [reCallPopup, setReCallPopup] = useState<boolean>(false);
     const [cardId, setCardId] = useState<number>(-1);
-    const [reCallId, setReCallId] = useState<number>(-1);
     const [loading, setLoading] = useState(false);
 
 
@@ -124,6 +120,8 @@ const ProfileCard: FC<MyComponentProps> = ({ userData, userID, key, SendInterest
     }
 
 
+
+
     const handleSortlisted = async (id: number) => {
         setLoading(true);
         setShortlistedUser(!shortlistUser)
@@ -132,8 +130,6 @@ const ProfileCard: FC<MyComponentProps> = ({ userData, userID, key, SendInterest
             useridShortlist: id,
             status: !userData?.shortlist ? 'Y' : 'N'
         });
-        dispatch(matchMakingSuccess(mutationResult));
-        updateShortListedUser && updateShortListedUser(id, mutationResult);
         if (mutationResult.output === 1) {
             handleUpdateds && handleUpdateds(id);
         }
@@ -148,48 +144,11 @@ const ProfileCard: FC<MyComponentProps> = ({ userData, userID, key, SendInterest
             toUserid: cardId,
             status: userData?.interest.Send != 'S' ? 'S' : 'C'
         });
+        dispatch(searchByDataSuccess(mutationResult as any));
         if (mutationResult.apiResponse.output === 1) {
             handleUpdateds && handleUpdateds(cardId);
-            updateShortListedUser && updateShortListedUser(cardId, mutationResult)
         }
         setInterestPopup(false);
-        setLoading(false);
-
-    }
-
-
-    const handleRecallInterest = async () => {
-        setLoading(true);
-
-        if (reCallId === 1) {
-            const mutationResult = await useSendInterestMutation.mutateAsync({
-                fromUserid: userID,
-                toUserid: cardId,
-                status: ''
-            });
-            if (mutationResult.apiResponse.output === 1) {
-                updateShortListedUser && updateShortListedUser(cardId, mutationResult)
-            }
-        }
-
-        if (reCallId === 2) {
-            const mutationResult1 = await useSendInterestMutation.mutateAsync({
-                fromUserid: userID,
-                toUserid: cardId,
-                status: ''
-            });
-            const mutationResult2 = await useSendInterestMutation.mutateAsync({
-                fromUserid: cardId,
-                toUserid: userID,
-                status: ''
-            });
-            if (mutationResult1.apiResponse.output === 1) {
-                updateShortListedUser && updateShortListedUser(cardId, mutationResult1)
-            }
-        }
-
-        handleUpdateds && handleUpdateds(1);
-        setReCallPopup(false);
         setLoading(false);
 
     }
@@ -204,8 +163,6 @@ const ProfileCard: FC<MyComponentProps> = ({ userData, userID, key, SendInterest
         });
         console.log(mutationResult, 'mutationResult');
 
-        updateBlockListedUser && updateBlockListedUser(mutationResult, cardId);
-        updateShortListedUser && updateShortListedUser(cardId);
         if (mutationResult.output === 1) {
             handleUpdateds && handleUpdateds(cardId);
             setBlock && setBlock(cardId);
@@ -218,6 +175,14 @@ const ProfileCard: FC<MyComponentProps> = ({ userData, userID, key, SendInterest
     }
 
 
+    const convertFrom24To12Format = (time24: any) => {
+        const [sHours, minutes] = time24.match(/([0-9]{1,2}):([0-9]{2})/).slice(1);
+        const period = +sHours < 12 ? 'am' : 'pm';
+        const hours = +sHours % 12 || 12;
+
+        return `${hours}:${minutes} ${period}`;
+    }
+
 
 
     function getCity() {
@@ -226,6 +191,7 @@ const ProfileCard: FC<MyComponentProps> = ({ userData, userID, key, SendInterest
 
 
     const ull = userData?.user_last_login && userData?.user_last_login.split("-");
+    const getUserLastTimeLogin = ull && ull[2].split(' ')[1].split(':');
     const ullYear = ull && ull[0];
     let ullMonth = ull && ull[1];
     const ullDay = ull && ull[2].split(" ")[0];
@@ -241,9 +207,6 @@ const ProfileCard: FC<MyComponentProps> = ({ userData, userID, key, SendInterest
     const handleBlockPopupHide = () => {
         setBlockPopup(false);
     }
-    const handleRecallPopupHide = () => {
-        setReCallPopup(false);
-    }
 
 
 
@@ -251,11 +214,6 @@ const ProfileCard: FC<MyComponentProps> = ({ userData, userID, key, SendInterest
         setInterestPopup(true);
         setCardId(id);
 
-    }
-    const handleRecallPopupShow = (id: number, num: number) => {
-        setReCallPopup(true);
-        setCardId(id);
-        setReCallId(num);
     }
     const handleBlockPopupShow = (id: number) => {
         setBlockPopup(true);
@@ -265,8 +223,6 @@ const ProfileCard: FC<MyComponentProps> = ({ userData, userID, key, SendInterest
     const ShowNameONConditions = userData?.fullname.length > 16
         ? (userData?.fullname).toLocaleLowerCase().substring(0, 15).concat('...')
         : userData?.fullname.toLocaleLowerCase();
-
-
 
 
     return (
@@ -372,50 +328,30 @@ const ProfileCard: FC<MyComponentProps> = ({ userData, userID, key, SendInterest
                                 </p>
                             </div>
                         }
+
                         <div className={classes.card_Button_Wrapper}>
                             <div className={classes.button_section}>
-                                {userData?.interest?.Send != 'A' && userData?.interest?.Receive != 'A' &&
-                                    <Button disabled={
-                                        BlockedUser?.includes(userData?.userid)
-                                        || userData?.interest?.Receive === 'D' || userData?.interest?.Receive === 'S' || userData?.interest?.Send === 'D'
-                                        || userData?.interest?.Receive === 'A' || userData?.interest?.Send === 'A'}
-                                        onClick={() => handleInterestPopupShow(userData?.userid)}
-                                        className={userData?.interest.Send === 'S' || userData?.interest?.Receive === 'S' ? classes.activebtn : ''}>
-                                        <BiHeartCircle className={userData?.interest.Send === 'S' || userData?.interest?.Receive === 'S' ? classes.activesvg : ''} />
-                                        {
-                                            userData?.interest.Send === 'S' || userData?.interest?.Receive === 'A'
-                                                ? userData?.interest?.Receive === 'A' || userData?.interest.Send === 'A'
-                                                    ? 'Interest Accepted'
-                                                    : userData?.interest?.Receive === 'D' || userData?.interest?.Send === 'D'
-                                                        ? 'Interest Declined'
-                                                        : 'Interest Sent'
-                                                : userData?.interest?.Receive === 'S' && userData?.interest?.Send != 'D'
-                                                    ? 'Interest Recived'
-                                                    : userData?.interest?.Send === 'D'
-                                                        ? 'Interest Declined'
-                                                        : 'Send Interest'
-                                        }
-                                    </Button>
-                                }
-
-                                {/* for recall interest form sender  */}
-                                {userData?.interest?.Receive === 'A' &&
-                                    <Button className={shortlistUser ? classes.activebtn : ''} onClick={() => handleRecallPopupShow(userData?.userid, 2)}>
-                                        <TbRefreshDot />
-                                        Recall Interest Both
-                                    </Button>
-                                }
-
-                                {/* for recall interest form reciver*/}
-
-                                {userData?.interest?.Send === 'A' &&
-                                    <Button className={shortlistUser ? classes.activebtn : ''} onClick={() => handleRecallPopupShow(userData?.userid, 1)}>
-                                        <TbRefreshDot />
-                                        Recall Interest
-                                    </Button>
-                                }
-
-
+                                <Button disabled={
+                                    BlockedUser?.includes(userData?.userid)
+                                    || userData?.interest?.Receive === 'D' || userData?.interest?.Receive === 'S' || userData?.interest?.Send === 'D'
+                                    || userData?.interest?.Receive === 'A' || userData?.interest?.Send === 'A'}
+                                    onClick={() => handleInterestPopupShow(userData?.userid)}
+                                    className={userData?.interest.Send === 'S' || userData?.interest?.Receive === 'S' ? classes.activebtn : ''}>
+                                    <BiHeartCircle className={userData?.interest.Send === 'S' || userData?.interest?.Receive === 'S' ? classes.activesvg : ''} />
+                                    {
+                                        userData?.interest.Send === 'S' || userData?.interest?.Receive === 'A'
+                                            ? userData?.interest?.Receive === 'A' || userData?.interest.Send === 'A'
+                                                ? 'Interest Accepted'
+                                                : userData?.interest?.Receive === 'D' || userData?.interest?.Send === 'D'
+                                                    ? 'Interest Declined'
+                                                    : 'Interest Sent'
+                                            : userData?.interest?.Receive === 'S' && userData?.interest?.Send != 'D'
+                                                ? 'Interest Recived'
+                                                : userData?.interest?.Send === 'D'
+                                                    ? 'Interest Declined'
+                                                    : 'Send Interest'
+                                    }
+                                </Button>
                                 <Button disabled={BlockedUser?.includes(userData?.userid)} className={shortlistUser ? classes.activebtn : ''} onClick={() => handleSortlisted(userData?.userid)}>
                                     <MdStars className={shortlistUser ? classes.activesvg : ''} />
                                     {shortlistUser ? 'Shortlisted' : 'Shortlist'}
@@ -437,10 +373,9 @@ const ProfileCard: FC<MyComponentProps> = ({ userData, userID, key, SendInterest
 
             {interestPopup && <ConfirMationsPopup loading={loading} confirmationsFun={handleSendInterest} handleInterestPopupHide={handleInterestPopupHide} index={0} title={userData?.interest.Send != 'S' ? 'Send Interest' : 'Recall Interest'} />}
             {blockPopup && <ConfirMationsPopup loading={loading} confirmationsFun={handleBlock} handleInterestPopupHide={handleBlockPopupHide} index={1} title={BlockedUser?.includes(userData?.userid) ? 'Unblock' : 'Block'} />}
-            {reCallPopup && <ConfirMationsPopup loading={loading} confirmationsFun={handleRecallInterest} handleInterestPopupHide={handleRecallPopupHide} index={4} title={'Recall Interest'} />}
         </>
     )
 }
 
-export default ProfileCard
+export default SearchProfileCard
 

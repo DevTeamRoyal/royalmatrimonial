@@ -23,8 +23,8 @@ const DeclineInterestOfYou: React.FC<ComponentsProps> = ({ key, data, userId, Bl
 
     useEffect(() => {
         const AcceptedData = data && data?.filter((user) => {
-            if (user?.status === 'D'
-                || user?.usercard?.interest?.Receive === 'D')
+            if (user?.status === 'S'
+                && user?.usercard?.interest?.Receive === 'D')
                 return user
         })
         setDeclineInterestUser(AcceptedData);
@@ -49,7 +49,7 @@ const DeclineInterestOfYou: React.FC<ComponentsProps> = ({ key, data, userId, Bl
                 </div>
                 :
                 <>
-                    <PageHeading heading="you have Decline interest of these profile !!" />
+                    <PageHeading heading="Your Interest Has Been Decline By These Profiles !! !!" />
                     <div className={classes.card_container}>
                         {DeclineInterestUser && DeclineInterestUser.map((user) => {
                             if (user.usercard) {

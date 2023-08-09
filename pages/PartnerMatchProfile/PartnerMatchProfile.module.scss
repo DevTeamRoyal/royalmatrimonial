@@ -102,6 +102,13 @@
   }
 }
 
+.galleryModel {
+  .galleryModel_title {
+    text-transform: capitalize;
+    font-weight: 500
+  }
+}
+
 @media only screen and (max-width: 990px) and (min-width: 768px) {
   .background_header {
     width: 100%;
